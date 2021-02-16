@@ -1,4 +1,30 @@
 ---
-- name: Example task
-  debug:
-    msg: Running example task
+- name: Create the ssh agent user.
+  user:
+    name: "{{ ssh_agent_user }}"
+    create_home: true
+  register: ssh_agent_user_result
+
+- name: Create the directory for systemd user services.
+  file:
+    path: "{{ ssh_agent_user_result.home }}/.config/systemd/user"
+    state: directory
+    owner: "{{ ssh_agent_user }}"
+    mode: "0755"
+
+- name: Create the systemd service file.
+  template:
+    src: templates/ssh-agent.service.j2
+    dest: "{{ ssh_agent_user_result.home }}/.config/systemd/user/ssh-agent.service"
+    owner: "{{ ssh_agent_user }}"
+    mode: "0644"
+  notify: Start the systemd service.
+
+- name: Enable the systemd service.
+  systemd:
+    name: ssh-agent.service
+    enabled: true
+    scope: user
+    daemon_reload: true
+  become_user: "{{ ssh_agent_user }}"
+  tags: molecule-notest

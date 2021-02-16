@@ -1,1 +1,9 @@
 ---
+- name: Start the systemd service.
+  systemd:
+    name: ssh-agent.service
+    state: started
+    daemon_reload: true
+    scope: user
+  become_user: "{{ ssh_agent_user }}"
+  tags: molecule-notest

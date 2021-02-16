@@ -3,6 +3,9 @@
 
   hosts: all
 
+  vars:
+    ssh_agent_user: sshagentuser
+
   tasks:
     - name: "Include role"
       include_role:
